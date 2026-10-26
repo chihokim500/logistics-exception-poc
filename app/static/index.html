@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>출고 예외 관리 PoC</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <div class="brand-title">출고 예외 관리 PoC</div>
+    <div class="brand-sub">주문·재고·출고 · 가상 데이터</div>
+  </div>
+  <div class="sim">
+    <div class="clock" title="데모 기준시각">
+      <span class="clock-label">기준시각</span>
+      <span id="clock">-</span>
+    </div>
+    <div class="progress" id="progress">-</div>
+    <select id="checkpoint" aria-label="재생 시점">
+      <option value="2026-10-26 11:00:59">11:00 주문수집 직후 (E02·E05)</option>
+      <option value="2026-10-26 11:01:00">11:01 재고할당 직후 (E01·E06)</option>
+      <option value="2026-10-26 11:30:00">11:30 C02 마감 30분 전 (E03)</option>
+      <option value="2026-10-26 13:30:00">13:30 C01 마감 30분 전</option>
+      <option value="2026-10-26 14:30:00">14:30 C03 마감 30분 전</option>
+      <option value="">끝까지 (15:10)</option>
+      <option value="2026-10-27 09:00:00">10-27 09:00 다음날 (입고 처리 시연)</option>
+    </select>
+    <button class="btn primary" id="btn-replay">▶ 재생</button>
+    <button class="btn" id="btn-detect" title="E03 마감위험 감지를 지금 기준시각으로 1회 실행. PoC에는 상시 스케줄러가 없어, 시나리오 재생(10분 간격 감지 이벤트) 또는 이 버튼으로만 감지합니다.">감지 실행</button>
+    <button class="btn" id="btn-inbound" title="입고예정일이 기준일 이하인 입고를 반영하고, 입고 대기 주문을 재할당">입고 처리</button>
+    <button class="btn ghost" id="btn-reset" title="DB를 시드 상태로 되돌림">초기화</button>
+  </div>
+</header>
+
+<nav class="tabs" role="tablist">
+  <button role="tab" data-tab="dashboard">대시보드 · 예외 큐</button>
+  <button role="tab" data-tab="orders">주문</button>
+  <button role="tab" data-tab="inventory">재고</button>
+  <button role="tab" data-tab="verify">검증</button>
+</nav>
+
+<main>
+  <section id="tab-dashboard" class="tab"></section>
+  <section id="tab-orders" class="tab"></section>
+  <section id="tab-inventory" class="tab"></section>
+  <section id="tab-verify" class="tab"></section>
+</main>
+
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" aria-hidden="true">
+  <button class="drawer-close" id="drawer-close" aria-label="닫기">✕</button>
+  <div id="drawer-body"></div>
+</aside>
+<div class="toasts" id="toasts"></div>
+
+<script src="app.js"></script>
+</body>
+</html>

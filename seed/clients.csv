@@ -1,0 +1,4 @@
+﻿client_id,name,category,storage_type,cutoff_time,partial_ship_allowed,min_remaining_days,default_carrier
+C01,생활잡화A,생활잡화,상온,14:00,Y,,CJ대한통운
+C02,신선식품B,신선식품,냉장,12:00,N,7,롯데택배
+C03,패션C,패션,상온,15:00,Y,,한진택배

@@ -1,0 +1,152 @@
+[
+  {
+    "rule_id": "E01",
+    "name": "재고부족",
+    "detect_at": "ALLOCATE",
+    "blocking": true,
+    "severity": "HIGH",
+    "sla_minutes": 60,
+    "approver_role": "OPERATOR",
+    "condition": "라인 주문수량 > 전체 가용재고(실재고-할당-보류) 합계",
+    "options": [
+      {
+        "code": "1",
+        "label": "부분출고",
+        "enable_if": "화주 partial_ship_allowed=Y AND 가용재고>0"
+      },
+      {
+        "code": "2",
+        "label": "입고 후 출고",
+        "enable_if": "약속출고일 이전 입고예정 수량 합계 >= 부족수량"
+      },
+      {
+        "code": "3",
+        "label": "화주 확인 후 취소",
+        "enable_if": "항상"
+      }
+    ]
+  },
+  {
+    "rule_id": "E02",
+    "name": "상품매핑 누락",
+    "detect_at": "IMPORT",
+    "blocking": true,
+    "severity": "MEDIUM",
+    "sla_minutes": 120,
+    "approver_role": "OPERATOR",
+    "condition": "(채널, 채널상품코드)에 대응하는 SKU 매핑 없음",
+    "options": [
+      {
+        "code": "1",
+        "label": "SKU 매핑 등록 후 재검증",
+        "enable_if": "항상"
+      },
+      {
+        "code": "2",
+        "label": "화주 문의",
+        "enable_if": "항상"
+      }
+    ]
+  },
+  {
+    "rule_id": "E03",
+    "name": "출고마감 위험",
+    "detect_at": "SCHEDULED_CHECK",
+    "blocking": false,
+    "severity": "HIGH",
+    "sla_minutes": null,
+    "sla_note": "화주 마감시각까지",
+    "approver_role": "OPERATOR",
+    "schedule_note": "운영 시 스케줄러가 10분마다 실행한다고 가정. PoC에는 상시 스케줄러가 없고, 시나리오 이벤트(RUN_DETECTION, 11:10~15:00 10분 간격) 또는 화면의 감지 실행 버튼으로만 실행",
+    "condition": "약속출고일=오늘 AND 기준시각 >= 마감-30분 AND 상태 IN (CONFIRMED, ALLOCATED, PICKING)",
+    "options": [
+      {
+        "code": "1",
+        "label": "우선 작업 지정",
+        "enable_if": "마감 전"
+      },
+      {
+        "code": "2",
+        "label": "익일 출고 전환(화주 알림)",
+        "enable_if": "항상"
+      }
+    ]
+  },
+  {
+    "rule_id": "E04",
+    "name": "피킹 후 취소요청",
+    "detect_at": "CANCEL_REQUEST",
+    "blocking": true,
+    "severity": "CRITICAL",
+    "sla_minutes": 15,
+    "approver_role": "OPERATOR",
+    "condition": "취소요청 시 상태 IN (PICKING, PACKED)",
+    "options": [
+      {
+        "code": "1",
+        "label": "출고 중단(송장 취소, 원위치 확인 후 재고 해제)",
+        "enable_if": "항상"
+      },
+      {
+        "code": "2",
+        "label": "출고 진행(고객 반품 안내)",
+        "enable_if": "항상"
+      }
+    ]
+  },
+  {
+    "rule_id": "E05",
+    "name": "주소 오류",
+    "detect_at": "IMPORT",
+    "blocking": true,
+    "severity": "MEDIUM",
+    "sla_minutes": 120,
+    "approver_role": "OPERATOR",
+    "condition": "우편번호가 숫자 5자리가 아님 OR 주소 공백",
+    "options": [
+      {
+        "code": "1",
+        "label": "주소 수정 후 재검증",
+        "enable_if": "항상"
+      },
+      {
+        "code": "2",
+        "label": "화주 문의",
+        "enable_if": "항상"
+      }
+    ]
+  },
+  {
+    "rule_id": "E06",
+    "name": "유통기한 임박",
+    "detect_at": "ALLOCATE",
+    "blocking": true,
+    "severity": "MEDIUM",
+    "sla_minutes": 60,
+    "approver_role": "OPERATOR",
+    "condition": "잔여일 >= 화주 min_remaining_days 인 Lot 가용 합계 < 주문수량 <= 전체 Lot 가용 합계",
+    "options": [
+      {
+        "code": "1",
+        "label": "임박 Lot 출고(화주 승인)",
+        "enable_if": "항상"
+      },
+      {
+        "code": "2",
+        "label": "재고부족으로 처리(E01 옵션 적용)",
+        "enable_if": "항상"
+      }
+    ]
+  },
+  {
+    "rule_id": "E07",
+    "name": "비허용 전이·중복 출고",
+    "detect_at": "API",
+    "blocking": false,
+    "severity": "LOW",
+    "sla_minutes": null,
+    "approver_role": null,
+    "condition": "전이 규칙표에 없는 상태 변경 요청 (SHIPPED 후 취소/재출고 등)",
+    "options": []
+  }
+]

@@ -1,0 +1,31 @@
+# static_demo 폴더(서버 없이 브라우저에서 실행되는 정적 데모)를 GitHub Pages로 배포합니다.
+# 저장소 Settings → Pages → Source를 "GitHub Actions"로 한 번 설정해야 동작합니다.
+name: Deploy static demo
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: static_demo
+      - id: deployment
+        uses: actions/deploy-pages@v4
